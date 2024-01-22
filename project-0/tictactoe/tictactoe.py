@@ -59,6 +59,7 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
+    if action not in actions(board): raise Exception("invalid move")
     board[action[0]][action[1]] = player(board)
     return board
 
@@ -106,6 +107,8 @@ def minimax(board:list):
     """
     start = Node(board, None)
     options = []
+    # if the game  is over there are no best actions
+    if terminal(board): return None
     #gather best utility values for each possible action
     for action in actions(start.state):
         if player(board) == X:
