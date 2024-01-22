@@ -1,7 +1,7 @@
 import csv
 import sys
 
-from util import Node, StackFrontier, QueueFrontier
+from util import Node, QueueFrontier
 
 # Maps names to a set of corresponding person_ids
 names = {}
@@ -91,9 +91,42 @@ def shortest_path(source, target):
 
     If no possible path, returns None.
     """
-
-    # TODO
-    raise NotImplementedError
+    # initialize explored set
+    explored = set()
+    # initalize frontier with start node
+    start = Node(state=source, parent=None, action=None)
+    frontier = QueueFrontier()
+    frontier.add(start)
+    step = 0
+    
+    def resolve_solution(node):
+        connection = []
+        while node.parent is not None:
+            connection.append([node.action, node.state])
+            node = node.parent
+            connection.reverse()
+        return connection
+        
+    while True:
+        step += 1
+        # end case - empty frontier
+        if frontier.empty():
+            return None
+        # get node from frontier
+        node = frontier.remove()
+        # add current state to explored
+        explored.add(node.state)
+        # loop through neighbours
+        for action, state in neighbors_for_person(node.state):
+            # end case - found target
+            if state == target:
+                child = Node(state=state, parent=node, action=action)
+                return resolve_solution(child)
+            # add unexplored state to frontier
+            else:
+                if not frontier.contains_state(state) and state not in explored:
+                    child = Node(state=state, parent=node, action=action)
+                    frontier.add(child)
 
 
 def person_id_for_name(name):
