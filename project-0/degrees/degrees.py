@@ -91,24 +91,24 @@ def shortest_path(source, target):
 
     If no possible path, returns None.
     """
+    # return an empty list if both names are the same person
+    if source == target: return []
     # initialize explored set
     explored = set()
     # initalize frontier with start node
     start = Node(state=source, parent=None, action=None)
     frontier = QueueFrontier()
     frontier.add(start)
-    step = 0
     
     def resolve_solution(node):
         connection = []
         while node.parent is not None:
-            connection.append([node.action, node.state])
+            connection.append((node.action, node.state))
             node = node.parent
             connection.reverse()
         return connection
         
     while True:
-        step += 1
         # end case - empty frontier
         if frontier.empty():
             return None
