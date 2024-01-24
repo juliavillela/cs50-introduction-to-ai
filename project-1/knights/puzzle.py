@@ -12,21 +12,45 @@ CKnave = Symbol("C is a Knave")
 # Puzzle 0
 # A says "I am both a knight and a knave."
 knowledge0 = And(
-    # TODO
+    # game conditions:
+    # A must be either knigth or knave
+    Or(AKnight, AKnave),
+    Not(And(AKnight, AKnave)),
+    # statements:
+    Biconditional(And(AKnight, AKnave), AKnight)
 )
 
 # Puzzle 1
 # A says "We are both knaves."
 # B says nothing.
 knowledge1 = And(
-    # TODO
+    # game conditions:
+    # A must be either knigth or knave
+    Or(AKnight, AKnave),
+    Not(And(AKnight, AKnave)),
+    # B must be either knigth or knave
+    Or(BKnight, BKnave),
+    Not(And(BKnight, BKnave)),
+    # statements:
+    Biconditional(And(AKnave, BKnave), AKnight) #if statement is true a is knigth, if false a is knave
 )
 
 # Puzzle 2
 # A says "We are the same kind."
 # B says "We are of different kinds."
 knowledge2 = And(
-    # TODO
+    # game conditions:
+    # A must be either knigth or knave
+    Or(AKnight, AKnave),
+    Not(And(AKnight, AKnave)),
+    # B must be either knigth or knave
+    Or(BKnight, BKnave),
+    Not(And(BKnight, BKnave)),
+
+    # A statement
+    Biconditional(Or(And(AKnave, BKnave), And(AKnight, BKnight)), AKnight),
+    # B statement
+    Biconditional(Or(And(AKnave, BKnight), And(AKnight, BKnave)), BKnight)
 )
 
 # Puzzle 3
@@ -35,7 +59,35 @@ knowledge2 = And(
 # B says "C is a knave."
 # C says "A is a knight."
 knowledge3 = And(
-    # TODO
+    # game conditions:
+    # A must be either knigth or knave
+    Or(AKnight, AKnave),
+    Not(And(AKnight, AKnave)),
+    # B must be either knigth or knave
+    Or(BKnight, BKnave),
+    Not(And(BKnight, BKnave)),
+    # C must be either knigth or knave
+    Or(CKnight, CKnave),
+    Not(And(CKnight, CKnave)),
+
+    # A statement
+    Or(
+        And(AKnave, AKnight), # A said "aknave" and it is true,
+        And(Not(AKnave), AKnave), # A said "aknave" and it is false,
+        And(AKnight, AKnight), # A said "aknight" and it is true,
+        And(Not(AKnight), AKnave), # A said "aknight" and it is false,
+    ),
+
+    # B statements 
+    Biconditional(Or(
+            And(AKnave, AKnight), # A said aknave and it is true
+            And(Not(AKnave), AKnave) # A said aknave and it is false
+        ), BKnight),
+
+    Biconditional(CKnave, BKnight),
+
+    # C statements
+    Biconditional(AKnight, CKnight) 
 )
 
 
