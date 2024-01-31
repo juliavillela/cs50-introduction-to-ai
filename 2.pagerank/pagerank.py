@@ -138,6 +138,11 @@ def iterate_pagerank(corpus, damping_factor):
     PageRank values should sum to 1.
     """
     def link_probability(corpus, convergence_limit):
+        """
+        Return the probability rank for a user arriving at each 
+        page from following a link in another page in the corpus
+        to precision conversion_limit.
+        """
         # initial rank is an equal distribution
         page_list = [k for k in corpus]
         rank = dict.fromkeys(page_list, 1/len(page_list))
