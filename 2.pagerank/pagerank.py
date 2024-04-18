@@ -150,7 +150,7 @@ def iterate_pagerank(corpus, damping_factor):
 
         while not convergence:
             new_rank = dict.fromkeys(page_list,0)
-            
+
             # calculate new rank for each page
             for page in page_list:
                 # list of pages that link to this page
@@ -165,7 +165,7 @@ def iterate_pagerank(corpus, damping_factor):
             for page in page_list:
                 if abs(new_rank[page] - rank[page]) > convergence_limit:
                     convergence = False
-            
+            print(rank)
             # update rank
             rank = new_rank
 
@@ -173,17 +173,17 @@ def iterate_pagerank(corpus, damping_factor):
     rank = {}
     page_list = [k for k in corpus]
     
-    probibility_corpus = {}
+    probability_corpus = {}
 
     # if a page has no links consider it to have links to all pages including itself
     for page in page_list:
         if len(corpus[page]) == 0:
-            probibility_corpus[page] = page_list
+            probability_corpus[page] = page_list
         else:
-            probibility_corpus[page] = corpus[page]
+            probability_corpus[page] = corpus[page]
 
     # likelyhood that user arived at page from link in another page
-    from_other_page = link_probability(probibility_corpus, .001)
+    from_other_page = link_probability(probability_corpus, .001)
     # damping factor
     damping_probability = (1-damping_factor)/len(page_list)
     for page in page_list:
