@@ -2,7 +2,6 @@ import os
 import random
 import re
 import sys
-from functools import reduce
 
 DAMPING = 0.85
 SAMPLES = 10000
@@ -137,63 +136,47 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    def link_probability(corpus, convergence_limit):
-        """
-        Return the probability rank for a user arriving at each 
-        page from following a link in another page in the corpus
-        to precision conversion_limit.
-        """
-        # initial rank is an equal distribution
-        page_list = [k for k in corpus]
-        rank = dict.fromkeys(page_list, 1/len(page_list))
-        convergence = False
-
-        while not convergence:
-            new_rank = dict.fromkeys(page_list,0)
-
-            # calculate new rank for each page
-            for page in page_list:
-                # list of pages that link to this page
-                links_to_page = [p for p,v in corpus.items() if page in v]
-                for other_page in links_to_page:
-                    # new rank value is the sum of:
-                    # probability of other page/ number of links in the other page
-                    new_rank[page] += rank[other_page]/len(corpus[other_page])
-            
-            # check if convergence has been met
-            convergence = True      
-            for page in page_list:
-                if abs(new_rank[page] - rank[page]) > convergence_limit:
-                    convergence = False
-            print(rank)
-            # update rank
-            rank = new_rank
-
-        return rank
-    rank = {}
     page_list = [k for k in corpus]
-    
-    probability_corpus = {}
+    damping_probability = (1 - damping_factor) / len(page_list)
+    convergence_limit = 0.001
 
-    # if a page has no links consider it to have links to all pages including itself
+    # adjust corpus to handle pages with no links
+    probability_corpus = {}
     for page in page_list:
         if len(corpus[page]) == 0:
             probability_corpus[page] = page_list
         else:
             probability_corpus[page] = corpus[page]
 
-    # likelyhood that user arived at page from link in another page
-    from_other_page = link_probability(probability_corpus, .001)
-    # damping factor
-    damping_probability = (1-damping_factor)/len(page_list)
-    for page in page_list:
-        rank[page] = damping_probability + (damping_factor*from_other_page[page])
-    
-    print("\n---debug")
-    for page in sorted(from_other_page):
-        print(f">{page}: click {from_other_page[page]:.4f} -> {damping_factor*from_other_page[page]:.4f} + {damping_probability:.4f} -> {rank[page]:.4f}")
+    # initialize rank with equal distribution
+    rank = dict.fromkeys(page_list, 1/len(page_list))
+    convergence = False
 
-    print("----\n")
+    # reccursively update rank until convergence
+    while not convergence:
+        new_rank = dict.fromkeys(page_list,0)
+
+        # calculate new rank for each page
+        for page in page_list:
+            # list of pages that link to this page
+            links_to_page = [p for p, v in probability_corpus.items() if page in v]
+            for other_page in links_to_page:
+                # probability of click from another page
+                link_rank = rank[other_page] / len(probability_corpus[other_page])
+                new_rank[page] += damping_factor * link_rank
+
+        # apply damping factor adjustment
+        for page in page_list:
+            new_rank[page] += damping_probability
+
+        # check if convergence has been met
+        convergence = True      
+        for page in page_list:
+            if abs(new_rank[page] - rank[page]) > convergence_limit:
+                convergence = False
+        # update rank
+        rank = new_rank
+
     return rank
 
 if __name__ == "__main__":
