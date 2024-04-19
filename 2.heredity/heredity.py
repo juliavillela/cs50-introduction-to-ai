@@ -139,7 +139,7 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    def probability_parent_passes_trait_gene(gene_count=None):
+    def probability_parent_passes_trait_gene(gene_count):
         if gene_count == 0:
             return PROBS["mutation"]
         if gene_count == 1:
@@ -154,10 +154,7 @@ def joint_probability(people, one_gene, two_genes, have_trait):
     probability_total = 1
 
     for person in people:
-        # if person has parents:
-        # use parent probability
-            # probability of gene in parent
-            # mutation
+
         mother = people[person]['mother']
         father = people[person]['father']
         gene_count = 1 if person in one_gene else 2 if person in two_genes else 0
@@ -166,39 +163,42 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         gene_global_probability = PROBS['gene'][gene_count]
         trait_probability = PROBS['trait'][gene_count][trait]
 
+        # if person has no known parents, set probability to general gene probability
         if father is None and mother is None:
             probability = gene_global_probability
 
         else:
             mother_gene_count = 1 if mother in one_gene else 2 if mother in two_genes else 0
             father_gene_count = 1 if father in one_gene else 2 if father in two_genes else 0
-            
+
             # received no trait genes
-            if gene_count == 0:             
-                probability = 1 - probability_parent_passes_trait_gene(mother_gene_count)
-                probability *=  (1 - probability_parent_passes_trait_gene(father_gene_count))
-                
+            if gene_count == 0:
+                from_mother = 1 - probability_parent_passes_trait_gene(mother_gene_count)
+                from_father =  (1 - probability_parent_passes_trait_gene(father_gene_count))
+                probability = (from_mother * from_father)
 
             #received trait from one parent
             elif gene_count == 1:
                 # received trait from father
-                p1 = 1 - probability_parent_passes_trait_gene(mother_gene_count)
-                p1 *=  probability_parent_passes_trait_gene(father_gene_count)
+                from_mother_1 = 1 - probability_parent_passes_trait_gene(mother_gene_count)
+                from_father_1 =  probability_parent_passes_trait_gene(father_gene_count)
 
                 # received trait from mother
-                p2 = probability_parent_passes_trait_gene(mother_gene_count)
-                p2 *=  (1 - probability_parent_passes_trait_gene(father_gene_count))
+                from_mother_2 = probability_parent_passes_trait_gene(mother_gene_count)
+                from_father_2 =  (1 - probability_parent_passes_trait_gene(father_gene_count))
 
-                probability = p1*p2
+                probability = (from_father_1*from_mother_1) + (from_father_2 * from_mother_2)
 
             #received trait from both parents
             elif gene_count == 2:
-                probability = probability_parent_passes_trait_gene(mother_gene_count)
-                probability *= probability_parent_passes_trait_gene(father_gene_count)
+                from_mother = probability_parent_passes_trait_gene(mother_gene_count)
+                from_father = probability_parent_passes_trait_gene(father_gene_count)
 
-            probability *= trait_probability
-            probability_total *= probability
-            print(probability_total)
+                probability = (from_mother * from_father)
+            
+        probability_total *= (probability * trait_probability)
+
+    print(probability_total)
     return probability_total
 
 
