@@ -139,7 +139,67 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    raise NotImplementedError
+    def probability_parent_passes_trait_gene(gene_count=None):
+        if gene_count == 0:
+            return PROBS["mutation"]
+        if gene_count == 1:
+            #passed the other gene and it mutated
+            passed_other_gene = PROBS["mutation"] 
+            # passed trait gene and it did not mutate
+            passed_trait_gene = 1-PROBS["mutation"]
+            return (passed_other_gene+passed_trait_gene)/2
+        if gene_count == 2:
+            return 1-PROBS["mutation"]
+        
+    probability_total = 1
+
+    for person in people:
+        # if person has parents:
+        # use parent probability
+            # probability of gene in parent
+            # mutation
+        mother = people[person]['mother']
+        father = people[person]['father']
+        gene_count = 1 if person in one_gene else 2 if person in two_genes else 0
+        trait = True if person in have_trait else False
+
+        gene_global_probability = PROBS['gene'][gene_count]
+        trait_probability = PROBS['trait'][gene_count][trait]
+
+        if father is None and mother is None:
+            probability = gene_global_probability
+
+        else:
+            mother_gene_count = 1 if mother in one_gene else 2 if mother in two_genes else 0
+            father_gene_count = 1 if father in one_gene else 2 if father in two_genes else 0
+            
+            # received no trait genes
+            if gene_count == 0:             
+                probability = 1 - probability_parent_passes_trait_gene(mother_gene_count)
+                probability *=  (1 - probability_parent_passes_trait_gene(father_gene_count))
+                
+
+            #received trait from one parent
+            elif gene_count == 1:
+                # received trait from father
+                p1 = 1 - probability_parent_passes_trait_gene(mother_gene_count)
+                p1 *=  probability_parent_passes_trait_gene(father_gene_count)
+
+                # received trait from mother
+                p2 = probability_parent_passes_trait_gene(mother_gene_count)
+                p2 *=  (1 - probability_parent_passes_trait_gene(father_gene_count))
+
+                probability = p1*p2
+
+            #received trait from both parents
+            elif gene_count == 2:
+                probability = probability_parent_passes_trait_gene(mother_gene_count)
+                probability *= probability_parent_passes_trait_gene(father_gene_count)
+
+            probability *= trait_probability
+            probability_total *= probability
+            print(probability_total)
+    return probability_total
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
@@ -149,7 +209,13 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+    for person in probabilities:
+        gene_count = 1 if person in one_gene else 2 if person in two_genes else 0
+        trait = True if person in have_trait else False
+        probabilities[person]["gene"][gene_count] += p
+        probabilities[person]["trait"][trait] += p
+
+    return
 
 
 def normalize(probabilities):
@@ -157,7 +223,20 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    for p in probabilities:
+        person = probabilities[p]
+        # get sum for each distribution for person
+        gene_sum = person["gene"][0] + person["gene"][1] + person["gene"][2]
+        trait_sum = person["trait"][True] + person["trait"][False]
+
+        # normalize values to sum to one by deviding by total distribution sum.
+        person["gene"][0] = person["gene"][0]/gene_sum
+        person["gene"][1] = person["gene"][1]/gene_sum
+        person["gene"][2] = person["gene"][2]/gene_sum
+
+        person["trait"][True] = person["trait"][True]/trait_sum
+        person["trait"][False] = person["trait"][False]/trait_sum
+    return
 
 
 if __name__ == "__main__":
