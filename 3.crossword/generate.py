@@ -273,16 +273,14 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        print("BACKTRACK", assignment)
         # if assignment complete:
-        # return assignment
         if self.assignment_complete(assignment):
             return assignment
+        
         else:
-
             # select optmized next variable
             var = self.select_unassigned_variable(assignment)
-            # get ordered words list
+            # get optimized ordered words list
             words = self.order_domain_values(var, assignment)
 
             for word in words:
@@ -292,8 +290,13 @@ class CrosswordCreator():
                 test_assignement[var] = word
                 if self.consistent(test_assignement):
                     # continue working on the possiblity of this assignement
-                    return self.backtrack(test_assignement)
-            #FAILURE
+                    result =  self.backtrack(test_assignement)
+                    # maintain arc-consistency for arcs that concert variable var
+                    arcs = [(n, var) for n in self.crossword.neighbors(var)]
+                    success = self.ac3(arcs)
+                    if success:
+                        return result
+            # failure-case could not find a solution
             return None
 
 
