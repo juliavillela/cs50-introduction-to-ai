@@ -7,7 +7,7 @@ class CrosswordGenerator:
         self.grid = CrosswordGrid(grid_size)
 
     def try_to_place(self, word, overlap_col, overlap_row, overlap_index):
-        print("trying to place ", word)
+        # print("trying to place ", word)
         (row, col) = get_absolute_placement(overlap_col, overlap_row, overlap_index, HORIZONTAL)
         if self.grid.can_place_horizontally(word, row, col):
             self.grid.place_word(word, row, col, HORIZONTAL)
@@ -18,7 +18,7 @@ class CrosswordGenerator:
             if self.grid.can_place_verticaly(word, row, col):
                 self.grid.place_word(word, row, col, VERTICAL)
                 return True
-        print("could not place", word)
+        # print("could not place", word)
         return False
     
     def iterative_placement(self):
@@ -26,9 +26,14 @@ class CrosswordGenerator:
         first_word = self.words.pop(0)
         (row,col) = self.grid.get_center_placement(first_word, HORIZONTAL)
         self.grid.place_word(first_word, row, col, HORIZONTAL)
-        self.grid.display()
+        # self.grid.display()
 
-        while len(self.words):
+        max_iterations = 3 * len(self.words)
+        iteration_count = 0
+
+        while iteration_count < max_iterations and len(self.words) != 0:
+            iteration_count += 1
+            placed = False
             word = self.words.pop(0)
             print(word)
             for index, char in enumerate(word):
@@ -36,9 +41,14 @@ class CrosswordGenerator:
                 if match:
                     placed = self.try_to_place(word, match[0], match[1], index)
                     if placed:
-                        self.grid.display()
+                        # self.grid.display()
                         break
-        
+            if not placed:
+                self.words.append(word)
+        self.grid.display()
+        print("could not place", self.words)
+        print("placed", self.grid.placed_words)
+
     def save(self, filename):
         self.grid.trim()
         text_rows = []
@@ -77,7 +87,21 @@ word_list_2 = [
     "maodeobra",
 ]
 
+word_list_3 = [
+    "cafecomleite",
+    "agua",
+    "suco",
+    "paonachapa",
+    "paodequeijo",
+    "tapioca",
+    "bolo",
+    "queijo",
+    "geleia",
+    "manteiga"
+]
+
 # word_list.extend(word_list_2)
-generator = CrosswordGenerator(word_list_2, 18)
+generator = CrosswordGenerator(word_list_3, 18)
 generator.iterative_placement()
+# generator.grid.display()
 generator.save("test.txt")
