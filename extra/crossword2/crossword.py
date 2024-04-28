@@ -87,12 +87,3 @@ class CrosswordGrid:
 
         # Update the grid attribute
         self.grid = trimmed_grid
-    
-
-
-test = CrosswordGrid(25)
-
-(row, col) = test.get_center_placement("proletariado", HORIZONTAL)
-print(row, col)
-test.place_word("proletariado", row, col, HORIZONTAL)
-test.display()
