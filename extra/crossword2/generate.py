@@ -1,8 +1,9 @@
+from random import shuffle
 from crossword import CrosswordGrid, VERTICAL, HORIZONTAL
 
 class CrosswordGenerator:
     def __init__(self, words:list, grid_size) -> None:
-        # words.sort(key= lambda w: len(w), reverse=True )
+        words.sort(key= lambda w: len(w), reverse=True )
         self.words = words
         self.grid = CrosswordGrid(grid_size)
 
@@ -21,6 +22,10 @@ class CrosswordGenerator:
         # print("could not place", word)
         return False
     
+    def get_next_word(self):
+        shuffle(self.words)
+        return self.words.pop(0)
+
     def iterative_placement(self):
         # place first word
         first_word = self.words.pop(0)
@@ -34,7 +39,7 @@ class CrosswordGenerator:
         while iteration_count < max_iterations and len(self.words) != 0:
             iteration_count += 1
             placed = False
-            word = self.words.pop(0)
+            word = self.get_next_word()
             print(word)
             for index, char in enumerate(word):
                 match = self.grid.find_char(char)
@@ -63,45 +68,3 @@ def get_absolute_placement(overlap_col, overlap_row, overlap_index, direction):
         return (overlap_col - overlap_index, overlap_row)
     else:
         return (overlap_col, overlap_row-overlap_index)
-
-word_list = [
-    "scooby",
-    "eva",
-    "onilda",
-    "peido",
-    "grude",
-    "dengo",
-    "mafalda",
-    "caneca",
-]
-
-word_list_2 = [
-    "proletariado",
-    "meiosdeproducao",
-    "maisvalia",
-    "lucro",
-    "capital",
-    "burguesia",
-    "classesocial",
-    "tempo",
-    "maodeobra",
-]
-
-word_list_3 = [
-    "cafecomleite",
-    "agua",
-    "suco",
-    "paonachapa",
-    "paodequeijo",
-    "tapioca",
-    "bolo",
-    "queijo",
-    "geleia",
-    "manteiga"
-]
-
-# word_list.extend(word_list_2)
-generator = CrosswordGenerator(word_list_3, 18)
-generator.iterative_placement()
-# generator.grid.display()
-generator.save("test.txt")
