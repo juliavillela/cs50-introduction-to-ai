@@ -1,11 +1,20 @@
+### general issues
+- [x ] should grid-size be determined by the word-list?  eg: start with size = longest word + x * len(wordlist)
+
+### crossword constraints
+- [x] there should be a max word count
+- [ ] should there be a max length for words? if so, which?
+
 ### placement constraints
-- [x] indexed for rows and columns need to be within grid range: start(row,col) cannot be smaller than 0 and end[row,col] cannot be >= len(grid)
+- [x] indexes for rows and columns need to be within grid range: start[row,col] cannot be smaller than 0 and end[row,col] cannot be >= len(grid)
 - [x] no conflict within a same square: a new value cannot be assigned to cells that are not None
-- [ ] no end-to-end: each word should have an empty square at the start and end cells according to direction
-- [ ] no side-by-side: two words in the same direction should not be next to each other. there should always be an empty line in between them 
+- [x] no end-to-end: each word should have an empty square at the start and end cells according to direction
+- [?] no side-by-side: two words in the same direction should not be next to each other. there should always be an empty line in between them: i think this might make solutions too hard to find.
 
 ### optimizing
-
+- [x] evaluate words before starting generator: if a word has no chars in common with the other words, it should not be placed. 
+- [ ] the while clause in iterative_placement could be better. Now it will run for twice the initial length of words or until words is empty
+- [ ] for each char in word, grid will iterate until it finds the same char in grid. is this te best order? word will always be shorter than grid
 
 ### scoring
 - width, height balance: a puzzle with a more balanced width height ratio is better
