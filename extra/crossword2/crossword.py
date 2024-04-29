@@ -11,6 +11,9 @@ class CrosswordGrid:
         self.grid = [[EMPTY for _ in range(initial)] for _ in range(initial)]
 
     def display(self):
+        """
+        Prints visualization of grid to terminal
+        """
         for row in self.grid:
             [print(char or "-", end=" ") for char in row]
             print()
@@ -28,10 +31,15 @@ class CrosswordGrid:
         return None
     
     def place_word(self, word, row, col, direction):
+        """
+        Adds word and position to placed_words and
+        updates grid to contain word at placement.
+
+        This method does not check if placement is allowed before altering the grid.
+        """
         self.placed_words[word] = ((row,col), direction)
         
         if direction == HORIZONTAL:
-
             if col > 0:
                 self.grid[row][col-1] = WORD_BOUNDARY
             if col + len(word) < len(self.grid):
@@ -39,8 +47,8 @@ class CrosswordGrid:
 
             for i, letter in enumerate(word):
                 self.grid[row][col + i] = letter
-        elif direction == VERTICAL:
 
+        elif direction == VERTICAL:
             if row > 0:
                 self.grid[row-1][col] = WORD_BOUNDARY
             if row + len(word) < len(self.grid):
@@ -49,25 +57,40 @@ class CrosswordGrid:
             for i, letter in enumerate(word):
                 self.grid[row + i][col] = letter
 
-    def can_place_verticaly(self, word, row, col):
+    def can_place_vertical(self, word, row, col):
+        """
+        Return True if word can be placed at position (row,col) vertically, else False.
+        The constraints for placement are:
+            1. word must fit the grid
+            2. word must be preceded and followed by an empty square
+            3. word cannot change any of the characters that have already been placed
+        """
+        # word fits in the grid
         if row < 0 or col < 0:
             return False
-        # word fits in the grid
         if row + len(word) >= len(self.grid):
             return False
         
         # the square before the start of word and after the end of word should be empty
         if row > 0 and self.grid[row-1][col] is not None or row < len(self.grid) and self.grid[row + len(word)][col] is not None:
             return False
-
-        for i, letter in enumerate(word):
-            # there are no conflicting characters on the cells word will occupy
+        
+        # there are no conflicting characters on the cells word will occupy
+        for i, letter in enumerate(word):     
             if self.grid[row + i][col] not in [None, letter]:
                 return False
 
         return True
     
-    def can_place_horizontally(self, word, row, col):
+    def can_place_horizontal(self, word, row, col):
+        """
+        Return True if word can be placed at position (row,col) horizontally, else False.
+        The constraints for placement are:
+            1. word must fit the grid
+            2. word must be preceded and followed by an empty square
+            3. word cannot change any of the characters that have already been placed
+        """
+        # word fits in the grid
         if row < 0 or col < 0:
             return False
         if col + len(word) >= len(self.grid):
@@ -76,13 +99,18 @@ class CrosswordGrid:
         # the square before the start of word and after the end of word should be empty
         if col > 0 and self.grid[row][col-1] is not None or col < len(self.grid) and  self.grid[row][col + len(word)] is not None:
             return False
-
+        
+        # there are no conflicting characters on the cells word will occupy
         for i, letter in enumerate(word):
             if self.grid[row][col + i] not in [None, letter]:
                 return False
         return True
 
     def get_center_placement(self, word, direction):
+        """
+        Return a tuple (row, col) for word placement that results in 
+        word being placed as close to the center of the grid as possible.
+        """
         center_col = center_row = math.floor(len(self.grid)/2)
         if direction == HORIZONTAL:
             col_offset = math.floor(len(word)/2)
@@ -92,6 +120,10 @@ class CrosswordGrid:
             return (center_row-row_offset, center_col)
         
     def trim(self):
+        """
+        Trims empty columns and empty rows from grid matrix. 
+        An empty line is a line where all values == None
+        """
         # Find the range of rows and columns with non-empty cells
         min_row = min_col = float('inf')
         max_row = max_col = float('-inf')
