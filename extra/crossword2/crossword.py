@@ -3,11 +3,11 @@ EMPTY = None
 
 HORIZONTAL = "HOR"
 VERTICAL = "VER"
-WORD_BOUNDARY = "_"
+WORD_BOUNDARY = " "
 
 class CrosswordGrid:
     def __init__(self, initial):
-        self.placed_words = []
+        self.placed_words = {}
         self.grid = [[EMPTY for _ in range(initial)] for _ in range(initial)]
 
     def display(self):
@@ -28,7 +28,8 @@ class CrosswordGrid:
         return None
     
     def place_word(self, word, row, col, direction):
-        self.placed_words.append(word)
+        self.placed_words[word] = ((row,col), direction)
+        
         if direction == HORIZONTAL:
 
             if col > 0:
@@ -56,7 +57,7 @@ class CrosswordGrid:
             return False
         
         # the square before the start of word and after the end of word should be empty
-        if self.grid[row-1][col] is not None or self.grid[row + len(word)][col] is not None:
+        if row > 0 and self.grid[row-1][col] is not None or row < len(self.grid) and self.grid[row + len(word)][col] is not None:
             return False
 
         for i, letter in enumerate(word):
@@ -73,7 +74,7 @@ class CrosswordGrid:
             return False
         
         # the square before the start of word and after the end of word should be empty
-        if self.grid[row][col-1] is not None or self.grid[row][col + len(word)] is not None:
+        if col > 0 and self.grid[row][col-1] is not None or col < len(self.grid) and  self.grid[row][col + len(word)] is not None:
             return False
 
         for i, letter in enumerate(word):
