@@ -142,3 +142,15 @@ class CrosswordGrid:
 
         # Update the grid attribute
         self.grid = trimmed_grid
+
+    def width(self):
+        """
+        number of columns
+        """
+        return len(self.grid[0])
+
+    def height(self):
+        """
+        number of rows
+        """
+        return len(self.grid)
