@@ -74,3 +74,71 @@ def get_absolute_placement(overlap_col, overlap_row, overlap_index, direction):
         return (overlap_col - overlap_index, overlap_row)
     else:
         return (overlap_col, overlap_row-overlap_index)
+
+MAX_WORDS = 25
+MIN_WORDS = 2
+
+def validate_wordlist(word_list):
+    # length is within range
+    if len(word_list) < MIN_WORDS or len(word_list) > MAX_WORDS:
+        return False
+    
+    # words should have at least one char in common with another word
+    for i, word1 in enumerate(word_list):
+        found_common = False
+        for j, word2 in enumerate(word_list):
+            if i != j:  # Skip comparing the word with itself
+                if any(char in word2 for char in word1):
+                    found_common = True
+                    break
+        if not found_common:
+            print(f"word '{word1}' has no characters in common with other words")
+            return False
+    return True
+
+class CrosswordGenerator: 
+    def __init__(self, words, attempts, min_options, max_grid_size):
+        """
+        attempts: how many chances the same builder has to try to generate a valid puzzle
+        min_options: the least amount of grids to collect before scoring the puzzles
+        give_up: after how many failures
+        max_grid_size: how large can the grid be. This number will also determine the threshold
+        for a failure in generating a valid grid. 
+        """
+        
+        if not validate_wordlist(words):
+            raise ValueError("word list is not valid")
+        
+        words.sort(key=lambda w: len(w), reverse=True)
+        longest = len(words[0])
+        
+        self.grid_size = longest + 2 # initial grid size
+        self.words = words
+        self.attempts = attempts
+
+        self.grids = [] # collection of successfully generated grids
+
+        self.min_options = min_options
+        self.max_grid_size = max_grid_size
+        self.failure_count = 0 # number of times Builder has returned false
+        self.success_count = 0 # number of times a Grid has been generated == len(self.grids)
+
+
+    def generate(self):
+        while len(self.grids) < self.min_options:
+            builder = CrosswordBuilder(self.words, self.grid_size)
+            print(builder)
+            for i in range(self.attempts):
+                grid = builder.iterative_placement()
+                if not grid:
+                    self.failure_count += 1
+                else:
+                    self.success_count += 1
+                    self.grids.append(grid)
+            self.grid_size += 2
+            if self.grid_size > self.max_grid_size:
+                return
+
+        for grid in self.grids:
+            grid.display()
+    

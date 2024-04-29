@@ -1,6 +1,6 @@
 from generate import CrosswordGenerator
 
-word_list = [
+word_list_1 = [
     "scooby",
     "eva",
     "onilda",
@@ -36,8 +36,8 @@ word_list_3 = [
     "manteiga"
 ]
 
-# word_list.extend(word_list_2)
-generator = CrosswordGenerator(word_list_3, 16)
-generator.iterative_placement()
-# generator.grid.display()
-generator.save("test.txt")
+word_list_4 = word_list_3 + word_list_2
+
+gen = CrosswordGenerator(word_list_4, 25, 5, 40)
+
+gen.generate()
