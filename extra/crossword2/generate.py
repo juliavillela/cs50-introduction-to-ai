@@ -2,11 +2,13 @@ from random import shuffle
 from crossword import CrosswordGrid, VERTICAL, HORIZONTAL
 
 class CrosswordGenerator:
-    def __init__(self, words:list, grid_size) -> None:
+    def __init__(self, words:list, grid_size:int) -> None:
         words.sort(key= lambda w: len(w), reverse=True )
         self.words = words
         self.grid = CrosswordGrid(grid_size)
 
+    def __str__(self):
+        return f"crossword generator: {self.words}"
     def try_to_place(self, word, overlap_col, overlap_row, overlap_index):
         # print("trying to place ", word)
         (row, col) = get_absolute_placement(overlap_col, overlap_row, overlap_index, HORIZONTAL)
@@ -27,19 +29,21 @@ class CrosswordGenerator:
         return self.words.pop(0)
 
     def iterative_placement(self):
+        queue = self.words.copy()
         # place first word
-        first_word = self.words.pop(0)
+        first_word = queue.pop(0)
         (row,col) = self.grid.get_center_placement(first_word, HORIZONTAL)
         self.grid.place_word(first_word, row, col, HORIZONTAL)
         # self.grid.display()
 
-        max_iterations = 3 * len(self.words)
+        shuffle(queue)
+        max_iterations = 2 * len(queue)
         iteration_count = 0
 
-        while iteration_count < max_iterations and len(self.words) != 0:
+        while iteration_count < max_iterations and len(queue) != 0:
             iteration_count += 1
             placed = False
-            word = self.get_next_word()
+            word = queue.pop(0)
             print(word)
             for index, char in enumerate(word):
                 match = self.grid.find_char(char)
@@ -49,10 +53,15 @@ class CrosswordGenerator:
                         # self.grid.display()
                         break
             if not placed:
-                self.words.append(word)
-        self.grid.display()
-        print("could not place", self.words)
-        print("placed", self.grid.placed_words)
+                queue.append(word)
+        if len(queue):
+            return False
+        else:
+            self.grid.trim()
+            return self.grid
+        # self.grid.display()
+        # print("could not place", self.words)
+        # print("placed", self.grid.placed_words)
 
     def save(self, filename):
         self.grid.trim()
