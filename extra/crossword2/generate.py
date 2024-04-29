@@ -9,34 +9,31 @@ class CrosswordGenerator:
 
     def __str__(self):
         return f"crossword generator: {self.words}"
+    
     def try_to_place(self, word, overlap_col, overlap_row, overlap_index):
         # print("trying to place ", word)
         (row, col) = get_absolute_placement(overlap_col, overlap_row, overlap_index, HORIZONTAL)
-        if self.grid.can_place_horizontally(word, row, col):
+        if self.grid.can_place_horizontal(word, row, col):
             self.grid.place_word(word, row, col, HORIZONTAL)
             return True
         else:
             # try vertical placement
             (row, col) = get_absolute_placement(overlap_col, overlap_row, overlap_index, VERTICAL)
-            if self.grid.can_place_verticaly(word, row, col):
+            if self.grid.can_place_vertical(word, row, col):
                 self.grid.place_word(word, row, col, VERTICAL)
                 return True
         # print("could not place", word)
         return False
     
-    def get_next_word(self):
-        shuffle(self.words)
-        return self.words.pop(0)
-
     def iterative_placement(self):
         queue = self.words.copy()
-        # place first word
+        # place first word at the center of the grid
         first_word = queue.pop(0)
         (row,col) = self.grid.get_center_placement(first_word, HORIZONTAL)
         self.grid.place_word(first_word, row, col, HORIZONTAL)
-        # self.grid.display()
-
+        
         shuffle(queue)
+        # limit iteration count to twice the len of words
         max_iterations = 2 * len(queue)
         iteration_count = 0
 
@@ -50,7 +47,6 @@ class CrosswordGenerator:
                 if match:
                     placed = self.try_to_place(word, match[0], match[1], index)
                     if placed:
-                        # self.grid.display()
                         break
             if not placed:
                 queue.append(word)
