@@ -1,14 +1,15 @@
 from random import shuffle
 from crossword import CrosswordGrid, VERTICAL, HORIZONTAL
 
-class CrosswordGenerator:
+class CrosswordBuilder:
     def __init__(self, words:list, grid_size:int) -> None:
         words.sort(key= lambda w: len(w), reverse=True )
         self.words = words
-        self.grid = CrosswordGrid(grid_size)
+        self.grid_size = grid_size
+        self.grid = None
 
     def __str__(self):
-        return f"crossword generator: {self.words}"
+        return f"crossword generator({self.grid_size}): {self.words}"
     
     def try_to_place(self, word, overlap_col, overlap_row, overlap_index):
         # print("trying to place ", word)
@@ -27,6 +28,7 @@ class CrosswordGenerator:
     
     def iterative_placement(self):
         queue = self.words.copy()
+        self.grid = CrosswordGrid(self.grid_size)
         # place first word at the center of the grid
         first_word = queue.pop(0)
         (row,col) = self.grid.get_center_placement(first_word, HORIZONTAL)
@@ -41,7 +43,6 @@ class CrosswordGenerator:
             iteration_count += 1
             placed = False
             word = queue.pop(0)
-            print(word)
             for index, char in enumerate(word):
                 match = self.grid.find_char(char)
                 if match:
