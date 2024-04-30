@@ -6,7 +6,19 @@ VERTICAL = "VER"
 WORD_BOUNDARY = " "
 
 class CrosswordGrid:
-    def __init__(self, initial):
+    """
+    Represents a crossword puzzle.
+
+    placed_words is a dict containing all the words that have been placed in the grid
+    and their respective position: a tuple of ints (row, col) for the first char in word, 
+    and direction: VERTICAL or HORIZONTAL
+
+    grid is a two-dimentional list of rows and columns where each item represents a cell in the puzzle.
+    """
+    def __init__(self, initial:int):
+        """
+        Initializes an empty crossword with max width and length equal to initial.
+        """
         self.placed_words = {}
         self.grid = [[EMPTY for _ in range(initial)] for _ in range(initial)]
 
@@ -118,7 +130,7 @@ class CrosswordGrid:
         if direction == VERTICAL:
             row_offset = math.floor(len(word)/2)
             return (center_row-row_offset, center_col)
-        
+
     def trim(self):
         """
         Trims empty columns and empty rows from grid matrix. 

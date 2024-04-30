@@ -79,6 +79,12 @@ MAX_WORDS = 25
 MIN_WORDS = 2
 
 def validate_wordlist(word_list):
+    """
+    Return True if word_list is valid, else false.
+    A word_list is valid if 
+    - it has more than MIN_WORDS and less than MAX_WORDS
+    - each word has at least one char in common with another word.
+    """
     # length is within range
     if len(word_list) < MIN_WORDS or len(word_list) > MAX_WORDS:
         return False
@@ -96,13 +102,15 @@ def validate_wordlist(word_list):
             return False
     return True
 
-class CrosswordGenerator: 
+class CrosswordGenerator:
+    """
+    Use CrosswordBuilder and internal settings to generate valid crossword-grids.
+    """
     def __init__(self, words, attempts, min_options, max_grid_size):
         """
-        attempts: how many chances the same builder has to try to generate a valid puzzle
-        min_options: the least amount of grids to collect before scoring the puzzles
-        give_up: after how many failures
-        max_grid_size: how large can the grid be. This number will also determine the threshold
+        - attempts: how many chances the same builder has to try to generate a valid puzzle
+        - min_options: the least amount of grids to collect before scoring the puzzles
+        - max_grid_size: how large can the grid be. This number will also determine the threshold
         for a failure in generating a valid grid. 
         """
         
@@ -125,6 +133,18 @@ class CrosswordGenerator:
 
 
     def generate(self):
+        """
+        Generate at least min_options of valid puzzles (a valid puzzle is one that contains all words in word-list)
+        and store them in self.grids.
+
+        Tries to generate a valid puzzle self.attempt times 
+        starting from the smallest grid-size(as defined in the init method)
+        if not enough valid puzzles were generated, grid_size is incremented untill max_grid_size
+
+        #TBD : In many scenarios(eg: max_grid_size is close to largest word length) it is possible that no valid grid can be generated 
+        and there is no error catch implemented to handle this.
+        
+        """
         while len(self.grids) < self.min_options:
             builder = CrosswordBuilder(self.words, self.grid_size)
             print(builder)

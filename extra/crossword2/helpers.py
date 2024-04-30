@@ -1,4 +1,7 @@
-def save_grid_image(grid, filename:str):
+def save_grid_image(grid:list, filename:str):
+    """
+    Create an image representing the grid(a two-dimentional list) and save it to filename.
+    """
     from PIL import Image, ImageDraw, ImageFont
     cell_size = 50
     cell_border = 2
@@ -26,6 +29,7 @@ def save_grid_image(grid, filename:str):
             # Get the character in the cell
             char = grid.grid[row][col]
 
+            # Ignore EMPTY and WORD_BOUNDRY
             if char not in [None, " "]:
 
                 # Draw cell border
