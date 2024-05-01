@@ -3,7 +3,7 @@ EMPTY = None
 
 HORIZONTAL = "HOR"
 VERTICAL = "VER"
-WORD_BOUNDARY = " "
+FILLER = " "
 
 class CrosswordGrid:
     """
@@ -52,19 +52,20 @@ class CrosswordGrid:
         self.placed_words[word] = ((row,col), direction)
         
         if direction == HORIZONTAL:
+            #pad word start and end
             if col > 0:
-                self.grid[row][col-1] = WORD_BOUNDARY
+                self.grid[row][col-1] = FILLER
             if col + len(word) < len(self.grid):
-                self.grid[row][col + len(word)] = WORD_BOUNDARY
+                self.grid[row][col + len(word)] = FILLER
 
             for i, letter in enumerate(word):
                 self.grid[row][col + i] = letter
 
         elif direction == VERTICAL:
             if row > 0:
-                self.grid[row-1][col] = WORD_BOUNDARY
+                self.grid[row-1][col] = FILLER
             if row + len(word) < len(self.grid):
-                self.grid[row + len(word)][col] = WORD_BOUNDARY
+                self.grid[row + len(word)][col] = FILLER
 
             for i, letter in enumerate(word):
                 self.grid[row + i][col] = letter
@@ -78,16 +79,16 @@ class CrosswordGrid:
     def pad_intersection(self, row, col):
         # up-left
         if row > 0 and col > 0 and self.grid[row-1][col-1] == EMPTY:
-            self.grid[row-1][col-1] = WORD_BOUNDARY
+            self.grid[row-1][col-1] = FILLER
         #up-rigth
         if row > 0 and col < len(self.grid) and self.grid[row-1][col+1] == EMPTY:
-            self.grid[row-1][col+1] = WORD_BOUNDARY
+            self.grid[row-1][col+1] = FILLER
         #down-left
         if row < len(self.grid) and col > 0 and self.grid[row+1][col-1] == EMPTY:
-            self.grid[row+1][col-1] = WORD_BOUNDARY
+            self.grid[row+1][col-1] = FILLER
         #down-rigth
         if row < len(self.grid) and col < len(self.grid) and self.grid[row+1][col+1] == EMPTY:
-            self.grid[row+1][col+1] = WORD_BOUNDARY
+            self.grid[row+1][col+1] = FILLER
 
     def can_place_vertical(self, word, row, col):
         """
@@ -104,7 +105,9 @@ class CrosswordGrid:
             return False
         
         # the square before the start of word and after the end of word should be empty
-        if row > 0 and self.grid[row-1][col] is not None or row < len(self.grid) and self.grid[row + len(word)][col] is not None:
+        prev_empty_or_edge = row == 0 or self.grid[row-1][col] in [EMPTY, FILLER]
+        next_empty_or_edge = row + len(word) == len(self.grid) or self.grid[row + len(word)][col] in [EMPTY, FILLER]
+        if not (prev_empty_or_edge and next_empty_or_edge):
             return False
         
         # there are no conflicting characters on the cells word will occupy
@@ -129,7 +132,9 @@ class CrosswordGrid:
             return False
         
         # the square before the start of word and after the end of word should be empty
-        if col > 0 and self.grid[row][col-1] is not None or col < len(self.grid) and  self.grid[row][col + len(word)] is not None:
+        prev_empty_or_edge = col == 0 or self.grid[row][col-1] in [EMPTY, FILLER]
+        next_empty_or_edge = col + len(word) == len(self.grid) or self.grid[row][col + len(word)] in [EMPTY, FILLER]
+        if not (prev_empty_or_edge and next_empty_or_edge):
             return False
         
         # there are no conflicting characters on the cells word will occupy
