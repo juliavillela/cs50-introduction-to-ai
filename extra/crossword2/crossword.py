@@ -68,6 +68,26 @@ class CrosswordGrid:
 
             for i, letter in enumerate(word):
                 self.grid[row + i][col] = letter
+        
+        self.display()
+        intersections = self.intersections(word, row, col, direction)
+        for (row,col) in intersections:
+            self.pad_intersection(row, col)
+        print("word: ", word, " has intersections: ", intersections)
+
+    def pad_intersection(self, row, col):
+        # up-left
+        if row > 0 and col > 0 and self.grid[row-1][col-1] == EMPTY:
+            self.grid[row-1][col-1] = WORD_BOUNDARY
+        #up-rigth
+        if row > 0 and col < len(self.grid) and self.grid[row-1][col+1] == EMPTY:
+            self.grid[row-1][col+1] = WORD_BOUNDARY
+        #down-left
+        if row < len(self.grid) and col > 0 and self.grid[row+1][col-1] == EMPTY:
+            self.grid[row+1][col-1] = WORD_BOUNDARY
+        #down-rigth
+        if row < len(self.grid) and col < len(self.grid) and self.grid[row+1][col+1] == EMPTY:
+            self.grid[row+1][col+1] = WORD_BOUNDARY
 
     def can_place_vertical(self, word, row, col):
         """
@@ -166,3 +186,28 @@ class CrosswordGrid:
         number of rows
         """
         return len(self.grid)
+
+    def intersections(self, word, row, col, direction):
+        def word_range(row,col,direction):
+            if direction == VERTICAL:
+                return [(row + i, col) for i in range(len(word))]
+            if direction == HORIZONTAL:
+                return [(row, col + i) for i in range(len(word))]
+          
+        word1_range = word_range(row, col, direction)
+
+        if direction == VERTICAL:
+            perpendicular = [w for w in self.placed_words if self.placed_words[w][1] == HORIZONTAL]
+        else:
+            perpendicular = [w for w in self.placed_words if self.placed_words[w][1] == VERTICAL]
+
+        intersections = []
+
+        for word_2 in perpendicular:
+            word2_row, word2_col = self.placed_words[word_2][0]
+            word2_direction = self.placed_words[word_2][1]
+            word2_range = word_range(word2_row, word2_col, word2_direction)
+            for position in word1_range:
+                if position in word2_range:
+                    intersections.append(position)
+        return intersections
