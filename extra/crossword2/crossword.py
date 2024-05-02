@@ -177,22 +177,34 @@ class CrosswordGrid:
         self.grid = trimmed_grid
 
     def intersections(self, word, row, col, direction):
-
+        """
+        Returns a list of tuples (row,col) where an intersection occurs between word
+        and other perpendicular words.
+        """
+        # set of cells word occupies
         word1_range = word_range(word,row, col, direction)
 
+        # list of perpedicular words to check for intersection
         if direction == VERTICAL:
             perpendicular = [w for w in self.placed_words if self.placed_words[w][1] == HORIZONTAL]
         else:
             perpendicular = [w for w in self.placed_words if self.placed_words[w][1] == VERTICAL]
 
+        # list of intersection cells
         intersections = []
 
         for word_2 in perpendicular:
+            # set ofcells word_2 occupies
             word2_row, word2_col = self.placed_words[word_2][0]
             word2_direction = self.placed_words[word_2][1]
             word2_range = word_range(word_2, word2_row, word2_col, word2_direction)
-            # for position in word1_range:
-            #     if position in word2_range:
-            #         intersections.append(position)
+
             intersections.extend(word1_range.intersection(word2_range))
+
         return intersections
+    
+    def width(self):
+        return len(self.grid[0])
+    
+    def height(self):
+        return len(self.grid)
