@@ -1,3 +1,5 @@
+from constants import *
+
 def save_grid_image(grid:list, filename:str):
     """
     Create an image representing the grid(a two-dimentional list) and save it to filename.
@@ -43,3 +45,9 @@ def save_grid_image(grid:list, filename:str):
                 draw.text((text_x, text_y), char, fill="black", font=font)
 
     img.save(filename)
+
+def word_range(word, row, col, direction):
+    if direction == VERTICAL:
+        return set([(row + i, col) for i in range(len(word))])
+    else:
+        return set([(row, col + i) for i in range(len(word))])

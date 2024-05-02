@@ -1,5 +1,7 @@
 from random import shuffle
-from crossword import CrosswordGrid, VERTICAL, HORIZONTAL
+
+from constants import *
+from crossword import CrosswordGrid
 
 class CrosswordBuilder:
     def __init__(self, words:list, grid_size:int) -> None:
@@ -70,8 +72,7 @@ def get_absolute_placement(overlap_col, overlap_row, overlap_index, direction):
     else:
         return (overlap_col, overlap_row-overlap_index)
 
-MAX_WORDS = 25
-MIN_WORDS = 2
+
 
 def validate_wordlist(word_list):
     """
