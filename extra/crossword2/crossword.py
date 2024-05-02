@@ -180,25 +180,13 @@ class CrosswordGrid:
         # Update the grid attribute
         self.grid = trimmed_grid
 
-    def width(self):
-        """
-        number of columns
-        """
-        return len(self.grid[0])
-
-    def height(self):
-        """
-        number of rows
-        """
-        return len(self.grid)
-
     def intersections(self, word, row, col, direction):
         def word_range(row,col,direction):
             if direction == VERTICAL:
                 return [(row + i, col) for i in range(len(word))]
             if direction == HORIZONTAL:
                 return [(row, col + i) for i in range(len(word))]
-          
+            
         word1_range = word_range(row, col, direction)
 
         if direction == VERTICAL:
