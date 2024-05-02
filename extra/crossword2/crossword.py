@@ -1,10 +1,6 @@
 import math
-EMPTY = None
-
-HORIZONTAL = "HOR"
-VERTICAL = "VER"
-FILLER = " "
-
+from constants import *
+from helpers import word_range
 class CrosswordGrid:
     """
     Represents a crossword puzzle.
@@ -162,8 +158,8 @@ class CrosswordGrid:
         An empty line is a line where all values == None
         """
         # Find the range of rows and columns with non-empty cells
-        min_row = min_col = float('inf')
-        max_row = max_col = float('-inf')
+        min_row = min_col = len(self.grid)
+        max_row = max_col = 0
         for row_i, row in enumerate(self.grid):
             for col_i, cell in enumerate(row):
                 if cell is not None:
@@ -181,13 +177,8 @@ class CrosswordGrid:
         self.grid = trimmed_grid
 
     def intersections(self, word, row, col, direction):
-        def word_range(row,col,direction):
-            if direction == VERTICAL:
-                return [(row + i, col) for i in range(len(word))]
-            if direction == HORIZONTAL:
-                return [(row, col + i) for i in range(len(word))]
-            
-        word1_range = word_range(row, col, direction)
+
+        word1_range = word_range(word,row, col, direction)
 
         if direction == VERTICAL:
             perpendicular = [w for w in self.placed_words if self.placed_words[w][1] == HORIZONTAL]
@@ -199,8 +190,9 @@ class CrosswordGrid:
         for word_2 in perpendicular:
             word2_row, word2_col = self.placed_words[word_2][0]
             word2_direction = self.placed_words[word_2][1]
-            word2_range = word_range(word2_row, word2_col, word2_direction)
-            for position in word1_range:
-                if position in word2_range:
-                    intersections.append(position)
+            word2_range = word_range(word_2, word2_row, word2_col, word2_direction)
+            # for position in word1_range:
+            #     if position in word2_range:
+            #         intersections.append(position)
+            intersections.extend(word1_range.intersection(word2_range))
         return intersections
