@@ -12,7 +12,6 @@ class CrosswordBuilder:
         return f"crossword generator({self.grid_size}): {self.words}"
     
     def try_to_place(self, word, overlap_col, overlap_row, overlap_index):
-        # print("trying to place ", word)
         (row, col) = get_absolute_placement(overlap_col, overlap_row, overlap_index, HORIZONTAL)
         if self.grid.can_place_horizontal(word, row, col):
             self.grid.place_word(word, row, col, HORIZONTAL)
@@ -23,7 +22,6 @@ class CrosswordBuilder:
             if self.grid.can_place_vertical(word, row, col):
                 self.grid.place_word(word, row, col, VERTICAL)
                 return True
-        # print("could not place", word)
         return False
     
     def iterative_placement(self):
@@ -56,9 +54,6 @@ class CrosswordBuilder:
         else:
             self.grid.trim()
             return self.grid
-        # self.grid.display()
-        # print("could not place", self.words)
-        # print("placed", self.grid.placed_words)
 
     def save(self, filename):
         self.grid.trim()
@@ -147,8 +142,9 @@ class CrosswordGenerator:
         """
         while len(self.grids) < self.min_options:
             builder = CrosswordBuilder(self.words, self.grid_size)
-            print(builder)
+            print("\n-------\n", builder)
             for i in range(self.attempts):
+                print("\ngenerate attempt ", i)
                 grid = builder.iterative_placement()
                 if not grid:
                     self.failure_count += 1
