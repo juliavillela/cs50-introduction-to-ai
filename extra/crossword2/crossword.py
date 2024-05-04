@@ -229,6 +229,7 @@ class CrosswordGrid:
         for word_2 in perpendicular:
             word2_row, word2_col = self.words[word_2][0]
             word2_direction = self.words[word_2][1]
+            
             word2_range = word_range(word_2,word2_row, word2_col, word2_direction)
             for position in word1_range:
                 if position in word2_range:
