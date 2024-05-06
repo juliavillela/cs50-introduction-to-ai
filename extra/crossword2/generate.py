@@ -91,12 +91,12 @@ class CrosswordBuilder:
         grid = self.iterative_placement()
         iteration_counter = 0
         # stop when all words have been placed in grid or when iteration reaches max_count
-        while len(self.words) != len(grid.words) and iteration_counter < self.max_iteration_count:
+        while len(self.words) != len(grid.get_words()) and iteration_counter < self.max_iteration_count:
             iteration_counter += 1
             grid = self.iterative_placement()
         
         print("iteration count", iteration_counter)
-        if len(self.words) != len(grid.words):
+        if len(self.words) != len(grid.get_words()):
             return None
         else:
             return grid
