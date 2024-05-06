@@ -223,8 +223,214 @@ class CrosswordGrid:
                     intersections.append(position)
         return intersections
 
-    def width(self):
-        return len(self.grid[0])
+    # def width(self):
+    #     return len(self.grid[0])
     
+    # def height(self):
+    #     return len(self.grid)
+
+    def export(self):
+        """
+        Returns an instance of crossword from current grid
+        """
+        return Crossword(self.grid, self.words)
+    
+def clean(grid:list[list]):
+    """
+    Returns a copy of grid matrix where FILLER is replaced with None
+    """
+    clean_grid = []
+    for row in grid:
+        clean_row = []
+        for cell in row:
+            if cell == FILLER:
+                clean_row.append(EMPTY)
+            else:
+                clean_row.append(cell)
+        clean_grid.append(clean_row)
+    return clean_grid
+
+def trim(grid:list[list]):
+    """
+    Returns a copy of grid matrix where empty columns and empty rows have been removed 
+    An empty line is a line where all values == EMPTY
+
+    If called on an empty grid: returns empty grid unchanged.
+    """
+    # Find the range of rows and columns with non-empty cells
+    min_row = min_col = 0
+    max_row = max_col = len(grid)
+    for row_i, row in enumerate(grid):
+        for col_i, cell in enumerate(row):
+            if cell is not EMPTY:
+                min_row = min(min_row, row_i)
+                max_row = max(max_row, row_i)
+                min_col = min(min_col, col_i)
+                max_col = max(max_col, col_i)
+
+    # Create a new trimmed grid
+    trimmed_grid = []
+    for row in grid[min_row:max_row + 1]:
+        trimmed_grid.append(row[min_col:max_col + 1])
+
+    return trimmed_grid
+
+BLANK = " "
+from PIL import Image, ImageDraw, ImageFont
+
+class Crossword:
+    def __init__(self, grid:list[list], words:dict) -> None:
+        self.grid = clean(grid)
+
+        # Assign a number to each word and map cell position to number
+        self.positon_number_map = {}
+
+        horizontal_words = list(filter(lambda w: words[w][1]==HORIZONTAL, words))
+        # sort horizontal words by row index
+        horizontal_words.sort(key= lambda w: words[w][0][0])
+        vertical_words = list(filter(lambda w: words[w][1]==VERTICAL, words))
+        # sort vertical words by col index
+        vertical_words.sort(key= lambda w: words[w][0][1])
+        
+        for index, word in enumerate(horizontal_words):
+            position = words[word][0]
+            number = index + 1
+            self.positon_number_map[position] = str(number)
+
+        for index, word in enumerate(vertical_words):
+            position = words[word][0]
+            number = len(horizontal_words) + index + 1
+            # account for possibility that 2 words start at the same square
+            if self.positon_number_map.get(position):
+                self.positon_number_map[position] += f"/{number}"
+            else:
+                self.positon_number_map[position] = str(number)
+
+        self.blank = self._get_blank_grid()
+        self.key = self._get_key_grid()
+    
+    def _get_blank_grid(self):
+        blank = []
+        for row_i, row in enumerate(self.grid):
+            blank_row = []
+            for col_i, cell in enumerate(row):
+                if (row_i, col_i) in self.positon_number_map:
+                    blank_row.append(self.positon_number_map[(row_i, col_i)])
+                elif cell != EMPTY:
+                    blank_row.append(BLANK)
+                else:
+                    blank_row.append(EMPTY)
+            blank.append(blank_row)
+        return trim(blank)
+    
+    def _get_key_grid(self):
+        return trim(self.grid)
+
+    def display_key_grid(self):
+        """
+        Prints visualization of grid to terminal
+        """
+        for row in self.key:
+            [print(char or "-", end=" ") for char in row]
+            print()
+        print()
+    
+    def display_blank_grid(self):
+        """
+        Prints visualization of grid to terminal
+        """
+        for row in self.blank:
+            [print(char or "-", end=" ") for char in row]
+            print()
+        print()
+    
+    def save_key_img(self, filename):
+        cell_size = 50
+        cell_border = 2
+        interior_size = cell_size - 2 * cell_border
+
+        img = Image.new(
+            "RGBA",
+            ( self.width() * cell_size,
+            self.height() * cell_size),
+            "white"
+        )
+
+        font = ImageFont.load_default(40)
+        draw = ImageDraw.Draw(img)
+
+        for row in range(self.height()):
+            for col in range(self.width()):
+                # Calculate coordinates for the cell
+                x0 = col * cell_size
+                y0 = row * cell_size
+                x1 = (col + 1) * cell_size
+                y1 = (row + 1) * cell_size
+
+
+                # Get the character in the cell
+                char = self.key[row][col]
+
+                # Ignore EMPTY and WORD_BOUNDRY
+                if char is not EMPTY:
+
+                    # Draw cell border
+                    draw.rectangle([x0, y0, x1, y1], fill="white", outline="black")
+                    # Calculate text size and position
+                    # text_size = draw.textsize(char, font=font)
+                    text_x = x0 + (interior_size - 25) / 2
+                    text_y = y0 + (interior_size - 45) / 2
+
+                    # Draw the character in the cell
+                    draw.text((text_x, text_y), char, fill="black", font=font)
+
+        img.save(filename)
+
+    def save_blank_img(self, filename):
+
+        cell_size = 50
+        cell_border = 2
+        interior_size = cell_size - 2 * cell_border
+
+        img = Image.new(
+            "RGBA",
+            ( self.width() * cell_size,
+            self.height() * cell_size),
+            "white"
+        )
+
+        font = ImageFont.load_default(20)
+        draw = ImageDraw.Draw(img)
+
+        for row in range(self.height()):
+            for col in range(self.width()):
+                # Calculate coordinates for the cell
+                x0 = col * cell_size
+                y0 = row * cell_size
+                x1 = (col + 1) * cell_size
+                y1 = (row + 1) * cell_size
+
+
+                # Get the character in the cell
+                char = self.blank[row][col]
+
+                # Ignore EMPTY and WORD_BOUNDRY
+                if char is not EMPTY:
+
+                    # Draw cell border
+                    draw.rectangle([x0, y0, x1, y1], fill="white", outline="black")
+                    # Calculate text size and position
+                    # text_size = draw.textsize(char, font=font)
+                    text_x = x0 + (interior_size - 25) / 2
+                    text_y = y0 + (interior_size - 45) / 2
+
+                    # Draw the character in the cell
+                    draw.text((text_x, text_y), char, fill="black", font=font)
+
+        img.save(filename)
+
     def height(self):
-        return len(self.grid)
+        return len(self.key)
+
+    def width(self):
+        return len(self.key[0])
