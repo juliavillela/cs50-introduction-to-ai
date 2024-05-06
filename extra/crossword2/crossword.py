@@ -106,32 +106,7 @@ class CrosswordGrid:
                 if char == cell:
                     positions.append((row_i, col_i))
         return positions
-    
-    def trim(self):
-        """
-        Returns a copy of grid where empty columns and empty rows have been removed 
-        An empty line is a line where all values == None
-
-        If called on an empty grid: returns empty grid unchanged.
-        """
-        # Find the range of rows and columns with non-empty cells
-        min_row = min_col = 0
-        max_row = max_col = len(self.grid)
-        for row_i, row in enumerate(self.grid):
-            for col_i, cell in enumerate(row):
-                if cell is not EMPTY:
-                    min_row = min(min_row, row_i)
-                    max_row = max(max_row, row_i)
-                    min_col = min(min_col, col_i)
-                    max_col = max(max_col, col_i)
-
-        # Create a new trimmed grid
-        trimmed_grid = []
-        for row in self.grid[min_row:max_row + 1]:
-            trimmed_grid.append(row[min_col:max_col + 1])
-
-        return trimmed_grid
-    
+       
     def display(self):
         """
         Prints visualization of grid to terminal
@@ -140,7 +115,19 @@ class CrosswordGrid:
             [print(char or "-", end=" ") for char in row]
             print()
         print()
-        
+    
+    def get_grid(self):
+        """
+        returns grid matrix
+        """
+        return self.grid
+    
+    def get_words(self):
+        """
+        returns a list of words
+        """
+        return self.words.keys()
+    
     def _place_chars(self, word:str, row:int, col:int, direction:str):
         """
         Updates grid to contain word characters at placement.
