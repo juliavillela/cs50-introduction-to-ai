@@ -50,7 +50,7 @@ def generate_crossword(word_list):
     gen = CrosswordGenerator(word_list)
     crossword = gen.generate()
     if crossword:
-        crossword.save_key_img(f"grids/test_key.png")
+        crossword.save_key_img("grids/test_key.png")
         crossword.save_blank_img("grids/test_blank.png")
     else:
         print("COULD NOT generate")
