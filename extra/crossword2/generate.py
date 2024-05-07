@@ -3,11 +3,6 @@ from random import shuffle
 from constants import *
 from crossword import CrosswordGrid
 
-MAX_WORDS = 25
-MIN_WORDS = 3
-MAX_WORD_LEN = 35
-MIN_WORD_LEN = 3
-
 class CrosswordBuilder:
     def __init__(self, words:list, grid_size, max_iteration_count=50) -> None:
         validate_word_list(words)
@@ -75,6 +70,7 @@ class CrosswordBuilder:
                 ((row,col), direction) = valid_placement
                 grid.place_word(word, row, col, direction)
             else:
+                # add word to the end of queue
                 words.append(word)
         # return grid (which might be incomplete)
         return grid
@@ -139,33 +135,29 @@ def validate_word_list(word_list):
 
 class CrosswordGenerator:
     """
-    Use CrosswordBuilder and internal settings to generate valid crossword-grids.
+    Use CrosswordBuilder and internal settings to generate valid crossword.
     """
-    def __init__(self, words, attempts, min_options, max_grid_size):
+    def __init__(self, word_list, attempts=None, max_grid_size=None) -> None:
+        pass
+        self.words = word_list
+        self.grid_size = self._get_min_grid_size()
+        self.max_grid_size = max_grid_size or MAX_WORD_LEN + 20 # will stop trying and return impossible
+        if self.grid_size > self.max_grid_size:
+            raise ValueError("WORD LIST IS TOO LARGE TO GENERATE")
+        self.attempts = attempts or 50
+
+    def _get_min_grid_size(self):
         """
-        - attempts: how many chances the same builder has to try to generate a valid puzzle
-        - min_options: the least amount of grids to collect before scoring the puzzles
-        - max_grid_size: how large can the grid be. This number will also determine the threshold
-        for a failure in generating a valid grid. 
+        Returns an integer to be used as starting grid_size for generator
+        based on wordlist.
         """
-        
-        if not validate_word_list(words):
-            raise ValueError("word list is not valid")
-        
-        words.sort(key=lambda w: len(w), reverse=True)
-        longest = len(words[0])
-        
-        self.grid_size = longest + 2 # initial grid size
-        self.words = words
-        self.attempts = attempts
-
-        self.grids = [] # collection of successfully generated grids
-
-        self.min_options = min_options
-        self.max_grid_size = max_grid_size
-        self.failure_count = 0 # number of times Builder has returned false
-        self.success_count = 0 # number of times a Grid has been generated == len(self.grids)
-
+        from math import sqrt, ceil
+        lengths = [len(s) for s in self.words]
+        total = sum(lengths)
+        lengths.sort()
+        longest = lengths[-1] # axis cannot be smaller then the longest word
+        area_axis = ceil(sqrt(total)*1.2) # expect at least 20% of the grid to be empty
+        return max(longest, area_axis)
 
     def generate(self):
         """
@@ -180,21 +172,12 @@ class CrosswordGenerator:
         and there is no error catch implemented to handle this.
         
         """
-        while len(self.grids) < self.min_options:
-            builder = CrosswordBuilder(self.words, self.grid_size)
-            print("\n-------\n", builder)
-            for i in range(self.attempts):
-                print("\ngenerate attempt ", i)
-                grid = builder.iterative_placement()
-                if not grid:
-                    self.failure_count += 1
-                else:
-                    self.success_count += 1
-                    self.grids.append(grid)
-            self.grid_size += 2
-            if self.grid_size > self.max_grid_size:
-                return
-
-        for grid in self.grids:
-            grid.display()
-    
+        while self.grid_size < self.max_grid_size:
+            builder = CrosswordBuilder(self.words, self.grid_size, self.attempts)
+            grid = builder.generate()
+            if grid:
+                crossword = grid.export()
+                return crossword
+            else:
+                self.grid_size += 1
+        return None
