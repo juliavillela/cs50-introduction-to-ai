@@ -138,7 +138,11 @@ class CrosswordGenerator:
     Use CrosswordBuilder and internal settings to generate valid crossword.
     """
     def __init__(self, word_list, attempts=None, max_grid_size=None) -> None:
-        pass
+        """
+        - word_list: a validated list of words to use in puzzle
+        - attempts: how many times builder will try to place words on the grid before returning None(defaults to 50)
+        - max_grid_size: how large a grid can get before generation fails (defaults to MAX_WORD_LEN + 20)
+        """
         self.words = word_list
         self.grid_size = self._get_min_grid_size()
         self.max_grid_size = max_grid_size or MAX_WORD_LEN + 20 # will stop trying and return impossible
