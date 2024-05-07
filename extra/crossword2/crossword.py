@@ -258,8 +258,8 @@ def trim(grid:list[list]):
     If called on an empty grid: returns empty grid unchanged.
     """
     # Find the range of rows and columns with non-empty cells
-    min_row = min_col = 0
-    max_row = max_col = len(grid)
+    min_row = min_col = len(grid)
+    max_row = max_col = 0
     for row_i, row in enumerate(grid):
         for col_i, cell in enumerate(row):
             if cell is not EMPTY:
@@ -316,7 +316,7 @@ class Crossword:
             for col_i, cell in enumerate(row):
                 if (row_i, col_i) in self.positon_number_map:
                     blank_row.append(self.positon_number_map[(row_i, col_i)])
-                elif cell != EMPTY:
+                elif cell is not EMPTY:
                     blank_row.append(BLANK)
                 else:
                     blank_row.append(EMPTY)
