@@ -1,16 +1,16 @@
 import math
 from constants import *
-from helpers import word_range
+from helpers import trim, clean
 
 class CrosswordGrid:
     """
-    Represents a crossword puzzle.
+    Represents a squre crosswordGrid that can place words according to constraints.
 
-    placed_words is a dict containing all the words that have been placed in the grid
+    Words is a dict containing all the words that have been placed in the grid
     and their respective position: a tuple of ints (row, col) for the first char in word, 
     and direction: VERTICAL or HORIZONTAL
  
-    grid is a two-dimentional list of rows and columns where each item represents a cell in the puzzle.
+    Grid is a two-dimentional list of rows and columns where each item represents a cell in the puzzle.
     """
     def __init__(self, initial:int):
         """
@@ -38,9 +38,9 @@ class CrosswordGrid:
         """
         Return True if word can be placed at position (row,col) vertically, else False.
         The constraints for placement are:
-            1. word must fit the grid
-            2. word must be preceded and followed by an empty square
-            3. word cannot change any of the characters that have already been placed
+        1. word must fit the grid
+        2. word must be preceded and followed by an empty square
+        3. word cannot change any of the characters that have already been placed
         """
         if not self._fits_in_grid(word, row, col, VERTICAL):
             return False
@@ -62,9 +62,9 @@ class CrosswordGrid:
         """
         Return True if word can be placed at position (row,col) horizontally, else False.
         The constraints for placement are:
-            1. word must fit the grid
-            2. word must be preceded and followed by an empty square
-            3. word cannot change any of the characters that have already been placed
+        1. word must fit the grid
+        2. word must be preceded and followed by an empty square
+        3. word cannot change any of the characters that have already been placed
         """
         if not self._fits_in_grid(word, row, col, HORIZONTAL):
             return False
@@ -161,7 +161,7 @@ class CrosswordGrid:
     
     def _pad_intersection(self, row:int, col:int):
         """
-        Adds filler char around intersections
+        Adds FILLER char around intersections
         """
         # up-left
         if row > 0 and col > 0 and self.grid[row-1][col-1] == EMPTY:
@@ -195,10 +195,13 @@ class CrosswordGrid:
     
     def _intersections(self, word:str, row:int, col:int, direction:str):
         """
-        returns a list of tupples (row,col) - each tuple represents a cell
+        Returns a list of tupples (row,col) - each tuple represents a cell
         where word intersects with another word in the oposing direction.
         """
         def word_range(word,row,col,direction):
+            """
+            Returns a list of tuples for each cell occupied by word
+            """
             if direction == VERTICAL:
                 return [(row + i, col) for i in range(len(word))]
             if direction == HORIZONTAL:
@@ -223,66 +226,65 @@ class CrosswordGrid:
                     intersections.append(position)
         return intersections
 
-    # def width(self):
-    #     return len(self.grid[0])
-    
-    # def height(self):
-    #     return len(self.grid)
-
     def export(self):
         """
-        Returns an instance of crossword from current grid
+        Returns an instance of Crossword from current grid
         """
         return Crossword(self.grid, self.words)
     
-def clean(grid:list[list]):
-    """
-    Returns a copy of grid matrix where FILLER is replaced with None
-    """
-    clean_grid = []
-    for row in grid:
-        clean_row = []
-        for cell in row:
-            if cell == FILLER:
-                clean_row.append(EMPTY)
-            else:
-                clean_row.append(cell)
-        clean_grid.append(clean_row)
-    return clean_grid
+# def clean(grid:list[list]):
+#     """
+#     Returns a copy of grid matrix where FILLER is replaced with None
+#     """
+#     clean_grid = []
+#     for row in grid:
+#         clean_row = []
+#         for cell in row:
+#             if cell == FILLER:
+#                 clean_row.append(EMPTY)
+#             else:
+#                 clean_row.append(cell)
+#         clean_grid.append(clean_row)
+#     return clean_grid
 
-def trim(grid:list[list]):
-    """
-    Returns a copy of grid matrix where empty columns and empty rows have been removed 
-    An empty line is a line where all values == EMPTY
+# def trim(grid:list[list]):
+#     """
+#     Returns a copy of grid matrix where empty columns and empty rows have been removed 
+#     An empty line is a line where all values == EMPTY
 
-    If called on an empty grid: returns empty grid unchanged.
-    """
-    # Find the range of rows and columns with non-empty cells
-    min_row = min_col = len(grid)
-    max_row = max_col = 0
-    for row_i, row in enumerate(grid):
-        for col_i, cell in enumerate(row):
-            if cell is not EMPTY:
-                min_row = min(min_row, row_i)
-                max_row = max(max_row, row_i)
-                min_col = min(min_col, col_i)
-                max_col = max(max_col, col_i)
+#     If called on an empty grid: returns empty grid unchanged.
+#     """
+#     # Find the range of rows and columns with non-empty cells
+#     # grids are assumed to be square
+#     min_row = min_col = len(grid)
+#     max_row = max_col = 0
+#     for row_i, row in enumerate(grid):
+#         for col_i, cell in enumerate(row):
+#             if cell is not EMPTY:
+#                 min_row = min(min_row, row_i)
+#                 max_row = max(max_row, row_i)
+#                 min_col = min(min_col, col_i)
+#                 max_col = max(max_col, col_i)
 
-    # Create a new trimmed grid
-    trimmed_grid = []
-    for row in grid[min_row:max_row + 1]:
-        trimmed_grid.append(row[min_col:max_col + 1])
+#     # Create a new trimmed grid
+#     trimmed_grid = []
+#     for row in grid[min_row:max_row + 1]:
+#         trimmed_grid.append(row[min_col:max_col + 1])
 
-    return trimmed_grid
+#     return trimmed_grid
 
-BLANK = " "
+# BLANK = " "
 from PIL import Image, ImageDraw, ImageFont
 
 class Crossword:
+    """
+    Represents a finalized Crossword puzzle
+    """
     def __init__(self, grid:list[list], words:dict) -> None:
         self.grid = clean(grid)
 
-        # Assign a number to each word and map cell position to number
+        # Assign a number to each word according to theirs starting row or columns
+        # and map cell position to number
         self.positon_number_map = {}
 
         horizontal_words = list(filter(lambda w: words[w][1]==HORIZONTAL, words))
@@ -310,6 +312,11 @@ class Crossword:
         self.key = self._get_key_grid()
     
     def _get_blank_grid(self):
+        """
+        Returns a trimmed blank version of grid where EMPTY cells remain EMPTY,
+        letters are replaced with BLANK and the starting position for 
+        each word is replaced with the corresponding number.
+        """
         blank = []
         for row_i, row in enumerate(self.grid):
             blank_row = []
@@ -324,6 +331,9 @@ class Crossword:
         return trim(blank)
     
     def _get_key_grid(self):
+        """
+        Returns a trimmed version of the key grid containing words and EMPTY
+        """
         return trim(self.grid)
 
     def display_key_grid(self):
@@ -430,7 +440,13 @@ class Crossword:
         img.save(filename)
 
     def height(self):
+        """
+        Returns int number of rows in grid
+        """
         return len(self.key)
 
     def width(self):
+        """
+        Returns int number of columns in grid
+        """
         return len(self.key[0])

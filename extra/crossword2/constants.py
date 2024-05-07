@@ -1,7 +1,8 @@
 EMPTY = None
 HORIZONTAL = "HOR"
 VERTICAL = "VER"
-FILLER = " "
+FILLER = "#"
+BLANK = " "
 
 MAX_WORDS = 25
 MIN_WORDS = 2
