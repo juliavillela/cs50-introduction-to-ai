@@ -9,13 +9,12 @@
 - [x] indexes for rows and columns need to be within grid range: start[row,col] cannot be smaller than 0 and end[row,col] cannot be >= len(grid)
 - [x] no conflict within a same square: a new value cannot be assigned to cells that are not None
 - [x] no end-to-end: each word should have an empty square at the start and end cells according to direction
-
-- [?] no side-by-side: two words in the same direction should not be next to each other. there should always be an empty line in between them: i think this might make solutions too hard to find.
+- [x] no side-by-side: once two words intersect, the diagonal tiles of the intersection are blocked to avoid words clustering of words.
 
 ### optimizing
 - [x] evaluate words before starting generator: if a word has no chars in common with the other words, it should not be placed. 
 - [ ] the while clause in iterative_placement could be better. Now it will run for twice the initial length of words or until words is empty
-- [ ] for each char in word, grid will iterate until it finds the same char in grid. is this te best order? word will always be shorter than grid
+- [ ] for each char in word, builder will iterate and find all possible intersections for that char and check if they are a valid placement, if so, will randomly choose one of the valid placements
 
 ### scoring
 I need to decide if i am goiing

@@ -1,6 +1,7 @@
 from generate import CrosswordGenerator
-from evaluate import score_grid
-from helpers import save_grid_image
+from helpers import validate_word_list
+from constants import *
+
 
 word_list_1 = [
     "scooby",
@@ -23,6 +24,8 @@ word_list_2 = [
     "classesocial",
     "tempo",
     "maodeobra",
+    "terra",
+    "trabalho"
 ]
 
 word_list_3 = [
@@ -39,11 +42,17 @@ word_list_3 = [
 ]
 
 word_list_4 = word_list_3 + word_list_2
+word_list_5 = word_list_3 + word_list_1
+word_list_6 = word_list_5 + word_list_4 # invalid
 
-gen = CrosswordGenerator(word_list_3, 5, 1, 40)
+def generate_crossword(word_list):
+    validate_word_list(word_list)
+    gen = CrosswordGenerator(word_list)
+    crossword = gen.generate()
+    if crossword:
+        crossword.save_key_img(f"grids/test_key.png")
+        crossword.save_blank_img("grids/test_blank.png")
+    else:
+        print("COULD NOT generate")
 
-gen.generate()
-
-for index,grid in enumerate(gen.grids):
-    print(index, score_grid(grid.grid))
-    save_grid_image(grid, f"grids/test{index}.png")
+generate_crossword(word_list_6)

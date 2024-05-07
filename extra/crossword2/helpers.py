@@ -1,63 +1,5 @@
 from constants import *
 
-# def save_grid_image(grid:list, filename:str):
-#     """
-#     Create an image representing the grid(a two-dimentional list) and save it to filename.
-#     """
-#     from PIL import Image, ImageDraw, ImageFont
-#     cell_size = 50
-#     cell_border = 2
-#     interior_size = cell_size - 2 * cell_border
-
-#     img = Image.new(
-#         "RGBA",
-#         ( grid.width() * cell_size,
-#         grid.height() * cell_size),
-#         "white"
-#     )
-
-#     font = ImageFont.load_default(40)
-#     draw = ImageDraw.Draw(img)
-
-#     for row in range(grid.height()):
-#         for col in range(grid.width()):
-#             # Calculate coordinates for the cell
-#             x0 = col * cell_size
-#             y0 = row * cell_size
-#             x1 = (col + 1) * cell_size
-#             y1 = (row + 1) * cell_size
-
-
-#             # Get the character in the cell
-#             char = grid.grid[row][col]
-
-#             # Ignore EMPTY and WORD_BOUNDRY
-#             if char not in [EMPTY, FILLER]:
-
-#                 # Draw cell border
-#                 draw.rectangle([x0, y0, x1, y1], fill="white", outline="black")
-#                 # Calculate text size and position
-#                 # text_size = draw.textsize(char, font=font)
-#                 text_x = x0 + (interior_size - 25) / 2
-#                 text_y = y0 + (interior_size - 45) / 2
-
-#                 # Draw the character in the cell
-#                 draw.text((text_x, text_y), char, fill="black", font=font)
-
-#     img.save(filename)
-
-# def word_range(word, row, col, direction):
-#     if direction == VERTICAL:
-#         return set([(row + i, col) for i in range(len(word))])
-#     else:
-#         return set([(row, col + i) for i in range(len(word))])
-    
-# def get_absolute_placement(overlap_col, overlap_row, overlap_index, direction):
-    # if direction == VERTICAL:
-    #     return (overlap_col - overlap_index, overlap_row)
-    # else:
-    #     return (overlap_col, overlap_row-overlap_index)
-
 def clean(grid:list[list]):
     """
     Returns a copy of grid matrix where FILLER is replaced with None
@@ -98,3 +40,39 @@ def trim(grid:list[list]):
         trimmed_grid.append(row[min_col:max_col + 1])
 
     return trimmed_grid
+
+def validate_word_list(word_list):
+    """
+    Raises an error if word list does not meet any of the criteria
+
+    A word_list is valid if:
+    - it has more than MIN_WORDS and less than MAX_WORDS.
+    - no words in list are either too long or too short
+    - each word has at least one char in common with another word.
+    """
+    # word list is of adequate length
+    if len(word_list) > MAX_WORDS or len(word_list) < MIN_WORDS:
+        raise ValueError(f"word list should have between {MIN_WORDS} and {MAX_WORDS}, not {len(word_list)}")
+
+    # no words are too long
+    too_long = [w for w in word_list if len(w)>MAX_WORD_LEN]
+    if len(too_long):
+        raise ValueError(f"word list contains words that are longer than {MAX_WORD_LEN}: {too_long}")
+    
+    # no words are too short
+    too_short = [w for w in word_list if len(w)<MIN_WORD_LEN]
+    if len(too_short):
+        raise ValueError(f"word list contains words that are shorter than {MIN_WORD_LEN}: {too_short}")
+    
+    # words should have at least one char in common with another word        
+    for i, word1 in enumerate(word_list):
+        found_common = False
+        for j, word2 in enumerate(word_list):
+            if i != j:  # Skip comparing the word with itself
+                if any(char in word2 for char in word1):
+                    found_common = True
+                    break
+        if not found_common:
+            raise ValueError(f"word list is impossible. word '{word1}' has no chars in common with other words")
+    
+    return True
